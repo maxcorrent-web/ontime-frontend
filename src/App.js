@@ -1,6 +1,6 @@
 import React from "react";
 import CalendarApp from "./CalendarApp";
-import "./styles/calendar.css";
+import "./calendar.css";
 
 function App() {
   return (

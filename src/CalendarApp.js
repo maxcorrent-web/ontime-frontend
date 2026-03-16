@@ -1,6 +1,6 @@
+import "./calendar.css";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./calendar.css";
 
 const BACKEND = "https://ontime-backend-5.onrender.com";
 
