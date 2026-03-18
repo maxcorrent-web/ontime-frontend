@@ -1,74 +1,83 @@
-import "./calendar.css";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import "./styles/calendar.css";
 
 const BACKEND_URL = "https://ontime-backend-5.onrender.com";
 
 function CalendarApp() {
-
+  const [schoologyUrl, setSchoologyUrl] = useState("");
+  const [bandUrl, setBandUrl] = useState("");
+  const [googleUrl, setGoogleUrl] = useState("");
   const [events, setEvents] = useState([]);
-  const [icsLink, setIcsLink] = useState("");
 
   const fetchEvents = async () => {
-    const res = await axios.get(`${BACKEND}/api/events`);
-    setEvents(res.data);
-  };
+    let allEvents = [];
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+    const fetchSource = async (url, color) => {
+      if (!url) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/events?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
 
-  const addCalendar = async () => {
-    if (!icsLink) return;
+        const colored = data.map(event => ({
+          title: event.title,
+          start: event.start,
+          end: event.end,
+          backgroundColor: color,
+          borderColor: color
+        }));
 
-    await axios.post(`${BACKEND}/api/add-ics`, {
-      url: icsLink
-    });
+        allEvents = [...allEvents, ...colored];
+      } catch (err) {
+        console.error("Error loading events:", err);
+      }
+    };
 
-    setIcsLink("");
-    fetchEvents();
+    await fetchSource(schoologyUrl, "#2563eb"); // blue
+    await fetchSource(bandUrl, "#16a34a");      // green
+    await fetchSource(googleUrl, "#dc2626");    // red
+
+    setEvents(allEvents);
   };
 
   return (
     <div className="container">
+      <div className="header">
+        <img src="/logo.png" alt="logo" className="logo" />
+        <h1>On Time</h1>
+      </div>
 
-      <h1 className="title">On Time</h1>
-
-      <div className="input-section">
+      <div className="input-boxes">
         <input
-          type="text"
-          placeholder="Paste Google / School / Band calendar link..."
-          value={icsLink}
-          onChange={(e) => setIcsLink(e.target.value)}
+          placeholder="Paste Schoology ICS URL"
+          value={schoologyUrl}
+          onChange={(e) => setSchoologyUrl(e.target.value)}
         />
 
-        <button onClick={addCalendar}>
-          Add Calendar
-        </button>
+        <input
+          placeholder="Paste Band Calendar ICS URL"
+          value={bandUrl}
+          onChange={(e) => setBandUrl(e.target.value)}
+        />
+
+        <input
+          placeholder="Paste Google Calendar ICS URL"
+          value={googleUrl}
+          onChange={(e) => setGoogleUrl(e.target.value)}
+        />
+
+        <button onClick={fetchEvents}>Load Calendars</button>
       </div>
 
-      <div className="events">
-
-        {events.length === 0 && (
-          <p className="no-events">
-            No events yet — add a calendar above
-          </p>
-        )}
-
-        {events.map((event, index) => (
-          <div key={index} className="event">
-
-            <h3>{event.title}</h3>
-
-            <p>
-              {new Date(event.start).toLocaleString()}
-            </p>
-
-          </div>
-        ))}
-
-      </div>
-
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        events={events}
+        height="80vh"
+      />
     </div>
   );
 }
