@@ -2,7 +2,7 @@ import "./calendar.css";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const BACKEND = "https://ontime-backend-5.onrender.com";
+const BACKEND_URL = "https://ontime-backend-5.onrender.com";
 
 function CalendarApp() {
 
