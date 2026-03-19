@@ -54,3 +54,16 @@ button {
 button:hover {
   background: #4338ca;
 }
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  input {
+    font-size: 14px;
+  }
+}

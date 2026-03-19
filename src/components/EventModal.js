@@ -46,3 +46,11 @@ export default function EventModal({ start, onClose, onSave }) {
     </Modal>
   );
 }
+useEffect(() => {
+  if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+}, []);
+new Notification("Event coming up!", {
+  body: "Check your On Time calendar"
+});
