@@ -3,7 +3,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import "./styles/calendar.css";
+import "./calendar.css";
 
 const BACKEND_URL = "https://ontime-backend-5.onrender.com";
 
