@@ -1,18 +1,4 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
-useEffect(() => {
-  const saved = JSON.parse(localStorage.getItem("calendars"));
-  if (saved) {
-    setSchoologyUrl(saved.schoology || "");
-    setBandUrl(saved.band || "");
-    setGoogleUrl(saved.google || "");
-  }
-}, []);
-localStorage.setItem("calendars", JSON.stringify({
-  schoology: schoologyUrl,
-  band: bandUrl,
-  google: googleUrl
-}));
+import React, { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -27,50 +13,113 @@ function CalendarApp() {
   const [googleUrl, setGoogleUrl] = useState("");
   const [events, setEvents] = useState([]);
 
+  // Load saved calendars
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("calendars"));
+    if (saved) {
+      setSchoologyUrl(saved.schoology || "");
+      setBandUrl(saved.band || "");
+      setGoogleUrl(saved.google || "");
+    }
+  }, []);
+
   const fetchEvents = async () => {
-  try {
-    // Clear old calendars first
-    await fetch(`${BACKEND_URL}/api/clear`, { method: "POST" });
+    try {
+      // Save URLs
+      localStorage.setItem(
+        "calendars",
+        JSON.stringify({
+          schoology: schoologyUrl,
+          band: bandUrl,
+          google: googleUrl,
+        })
+      );
 
-    // Add each calendar
-    const add = async (url) => {
-      if (!url) return;
-      await fetch(`${BACKEND_URL}/api/add-ics`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url })
+      // Clear backend calendars
+      await fetch(`${BACKEND_URL}/api/clear`, { method: "POST" });
+
+      // Add calendars
+      const addCalendar = async (url) => {
+        if (!url) return;
+        await fetch(`${BACKEND_URL}/api/add-ics`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url }),
+        });
+      };
+
+      await addCalendar(schoologyUrl);
+      await addCalendar(bandUrl);
+      await addCalendar(googleUrl);
+
+      // Get merged events
+      const res = await fetch(`${BACKEND_URL}/api/events`);
+      const data = await res.json();
+
+      // Color-code events
+      const colored = data.map((event, index) => {
+        let color = "#6366f1";
+
+        if (index % 3 === 0) color = "#2563eb"; // blue
+        if (index % 3 === 1) color = "#16a34a"; // green
+        if (index % 3 === 2) color = "#dc2626"; // red
+
+        return {
+          title: event.title,
+          start: event.start,
+          end: event.end,
+          backgroundColor: color,
+          borderColor: color,
+        };
       });
-    };
 
-    await add(schoologyUrl);
-    await add(bandUrl);
-    await add(googleUrl);
+      setEvents(colored);
+    } catch (err) {
+      console.error("Error loading calendars:", err);
+    }
+  };
 
-    // Fetch merged events
-    const res = await fetch(`${BACKEND_URL}/api/events`);
-    const data = await res.json();
+  return (
+    <div className="container">
+      <div className="header">
+        <img src="/logo.png" alt="logo" className="logo" />
+        <h1>On Time</h1>
+      </div>
 
-    // Color coding
-    const colored = data.map((event, i) => ({
-      ...event,
-      backgroundColor:
-        i % 3 === 0 ? "#2563eb" :
-        i % 3 === 1 ? "#16a34a" :
-        "#dc2626"
-    }));
+      <div className="input-boxes">
+        <input
+          placeholder="Paste Schoology ICS URL"
+          value={schoologyUrl}
+          onChange={(e) => setSchoologyUrl(e.target.value)}
+        />
 
-    setEvents(colored);
+        <input
+          placeholder="Paste Band Calendar ICS URL"
+          value={bandUrl}
+          onChange={(e) => setBandUrl(e.target.value)}
+        />
 
-  } catch (err) {
-    console.error(err);
-  }
-};
-<FullCalendar
-  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-  editable={true}
-  selectable={true}
-  events={events}
-/>
+        <input
+          placeholder="Paste Google Calendar ICS URL"
+          value={googleUrl}
+          onChange={(e) => setGoogleUrl(e.target.value)}
+        />
+
+        <button onClick={fetchEvents}>Load Calendars</button>
+      </div>
+
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        editable={true}
+        selectable={true}
+        events={events}
+        height="80vh"
+      />
+    </div>
+  );
+}
+
 export default CalendarApp;
