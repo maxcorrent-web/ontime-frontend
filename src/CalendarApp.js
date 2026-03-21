@@ -95,28 +95,25 @@ function CalendarApp() {
 
   // Load saved URLs on mount
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("calendars"));
-    if (saved) {
-      setSchoologyUrl(saved.schoology || "");
-      setBandUrl(saved.band || "");
-      setGoogleUrl(saved.google || "");
-
-      // Only fetch if saved URLs exist
-      if (saved.schoology || saved.band || saved.google) {
-        fetchEvents();
-      }
-    }
-  }, [fetchEvents]);
+  const saved = JSON.parse(localStorage.getItem("calendars"));
+  if (saved) {
+    setSchoologyUrl(saved.schoology || "");
+    setBandUrl(saved.band || "");
+    setGoogleUrl(saved.google || "");
+  }
+  // ❌ Do NOT fetch here; wait for user click
+}, []);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (schoologyUrl || bandUrl || googleUrl) {
-        fetchEvents();
-      }
-    }, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [schoologyUrl, bandUrl, googleUrl, fetchEvents]);
+  const interval = setInterval(() => {
+    if (schoologyUrl || bandUrl || googleUrl) {
+      fetchEvents();
+    }
+  }, 5 * 60 * 1000); // refresh every 5 minutes
+
+  return () => clearInterval(interval);
+}, [schoologyUrl, bandUrl, googleUrl, fetchEvents]);
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -147,11 +144,11 @@ function CalendarApp() {
           className="border-2 border-red-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-red-300"
         />
         <button
-          onClick={fetchEvents}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg"
-        >
-          Load Calendars
-        </button>
+  onClick={fetchEvents}
+  className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg"
+>
+  Load Calendars
+</button>
       </div>
 
       {/* Calendar */}
