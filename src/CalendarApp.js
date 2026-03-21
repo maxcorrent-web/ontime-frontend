@@ -139,8 +139,6 @@ await tryAdd(googleUrl, "Google");
     center: "title",
     right: "dayGridMonth,timeGridWeek,timeGridDay",
   }}
-  editable={true}
-  selectable={true}
   events={events}
   height="80vh"
 />
