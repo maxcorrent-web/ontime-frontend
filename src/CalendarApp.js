@@ -24,6 +24,9 @@ function CalendarApp() {
   }, []);
 
   const fetchEvents = async () => {
+    await fetch(`${BACKEND_URL}/api/clear`, {
+  method: "POST",
+});
     console.log("BUTTON CLICKED");
     try {
       // Save URLs
@@ -67,21 +70,21 @@ await tryAdd(googleUrl, "Google");
       const data = await res.json();
 
       // Color-code events
-      const colored = data.map((event, index) => {
-        let color = "#6366f1";
+      const colored = data.map((event) => {
+  let color = "#6366f1";
 
-        if (index % 3 === 0) color = "#2563eb"; // blue
-        if (index % 3 === 1) color = "#16a34a"; // green
-        if (index % 3 === 2) color = "#dc2626"; // red
+  if (event.source === "schoology") color = "#2563eb"; // blue
+  if (event.source === "band") color = "#16a34a"; // green
+  if (event.source === "google") color = "#dc2626"; // red
 
-        return {
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          backgroundColor: color,
-          borderColor: color,
-        };
-      });
+  return {
+    title: event.title,
+    start: event.start,
+    end: event.end,
+    backgroundColor: color,
+    borderColor: color,
+  };
+});
 
       setEvents(colored);
     } catch (err) {
@@ -92,9 +95,8 @@ await tryAdd(googleUrl, "Google");
   return (
     <div className="container">
       <div className="header">
-        <img src="/logo.png" alt="logo" className="logo" />
-        <h1>On Time</h1>
-      </div>
+  <h1 className="title">📅 On Time</h1>
+</div>
 
       <div className="input-boxes">
         <input
@@ -129,5 +131,17 @@ await tryAdd(googleUrl, "Google");
     </div>
   );
 }
-
+<FullCalendar
+  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+  initialView="dayGridMonth"
+  headerToolbar={{
+    left: "prev,next today",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay",
+  }}
+  editable={true}
+  selectable={true}
+  events={events}
+  height="80vh"
+/>
 export default CalendarApp;
