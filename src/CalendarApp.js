@@ -13,7 +13,7 @@ function CalendarApp() {
   const [googleUrl, setGoogleUrl] = useState("");
   const [events, setEvents] = useState([]);
 
-  // Load saved calendars
+  // Load saved URLs and setup auto-refresh
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("calendars"));
     if (saved) {
@@ -21,9 +21,16 @@ function CalendarApp() {
       setBandUrl(saved.band || "");
       setGoogleUrl(saved.google || "");
     }
-  }, []);
+
+    const interval = setInterval(() => {
+      fetchEvents();
+    }, 5 * 60 * 1000); // refresh every 5 minutes
+
+    return () => clearInterval(interval);
+  }, []); // only run once on mount
 
   const fetchEvents = async () => {
+    setEvents([]); // clear old events
     try {
       // Save URLs
       localStorage.setItem(
@@ -39,17 +46,17 @@ function CalendarApp() {
       await fetch(`${BACKEND_URL}/api/clear`, { method: "POST" });
 
       // Helper to add ICS calendar
-      const tryAdd = async (url, name) => {
+      const tryAdd = async (url, sourceName) => {
         if (!url) return;
         try {
           await fetch(`${BACKEND_URL}/api/add-ics`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({ url, source: sourceName.toLowerCase() }),
           });
-          console.log(`${name} loaded`);
+          console.log(`${sourceName} loaded`);
         } catch (err) {
-          console.error(`${name} failed`, err);
+          console.error(`${sourceName} failed`, err);
         }
       };
 
@@ -68,19 +75,19 @@ function CalendarApp() {
       const colored = data.map((event) => {
         let color = "#6366f1"; // default purple
         switch (event.source) {
-  case "schoology":
-    color = "#2563eb"; // blue
-    break;
-  case "band":
-    color = "#16a34a"; // green
-    break;
-  case "google":
-    color = "#dc2626"; // red
-    break;
-  default:
-    color = "#6366f1"; // default purple
-    break;
-}  
+          case "schoology":
+            color = "#2563eb"; // blue
+            break;
+          case "band":
+            color = "#16a34a"; // green
+            break;
+          case "google":
+            color = "#dc2626"; // red
+            break;
+          default:
+            color = "#6366f1";
+            break;
+        }
         return {
           title: event.title,
           start: event.start,
@@ -97,7 +104,7 @@ function CalendarApp() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 max-w-6xl">
       {/* Header */}
       <div className="header text-center mb-6">
         <h1 className="text-4xl font-bold text-indigo-600">📅 On Time</h1>
@@ -149,8 +156,11 @@ function CalendarApp() {
         height="auto"
         nowIndicator={true}
         weekNumbers={true}
-        slotMinTime="06:00:00"
-        slotMaxTime="22:00:00"
+        slotMinTime="00:00:00"
+        slotMaxTime="24:00:00"
+        eventDisplay="block"
+        eventTextColor="#fff"
+        dayMaxEvents={true}
       />
     </div>
   );
