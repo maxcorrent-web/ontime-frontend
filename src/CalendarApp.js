@@ -68,16 +68,19 @@ function CalendarApp() {
       const colored = data.map((event) => {
         let color = "#6366f1"; // default purple
         switch (event.source) {
-          case "schoology":
-            color = "#2563eb"; // blue
-            break;
-          case "band":
-            color = "#16a34a"; // green
-            break;
-          case "google":
-            color = "#dc2626"; // red
-            break;
-        }
+  case "schoology":
+    color = "#2563eb"; // blue
+    break;
+  case "band":
+    color = "#16a34a"; // green
+    break;
+  case "google":
+    color = "#dc2626"; // red
+    break;
+  default:
+    color = "#6366f1"; // default purple
+    break;
+}  
         return {
           title: event.title,
           start: event.start,
