@@ -1,6 +1,6 @@
 body {
-  background: #0f172a;
-  color: white;
+  background: #e5e7eb; /* light gray */
+  color: #111827; /* black text */
   font-family: Arial, sans-serif;
 }
 
@@ -10,6 +10,7 @@ body {
   padding: 20px;
 }
 
+/* Header */
 .header {
   text-align: center;
   margin-bottom: 20px;
@@ -17,11 +18,11 @@ body {
 
 .header h1 {
   font-size: 3rem;
-  background: linear-gradient(to right, #6366f1, #ec4899);
-  -webkit-background-clip: text;
-  color: transparent;
+  font-weight: bold;
+  color: #111827;
 }
 
+/* Inputs */
 .inputs {
   display: flex;
   flex-direction: column;
@@ -30,28 +31,47 @@ body {
 }
 
 .inputs input {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: black;
 }
 
+/* Button */
 .inputs button {
   padding: 12px;
-  background: linear-gradient(to right, #6366f1, #ec4899);
+  background: linear-gradient(to right, #f97316, #fb923c); /* orange gradient */
   border: none;
-  color: white;
+  color: black;
   border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
+  transition: 0.2s;
 }
 
+.inputs button:hover {
+  transform: scale(1.03);
+}
+
+/* Calendar container */
 .calendar-container {
-  background: #1e293b;
+  background: white;
   padding: 15px;
   border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
+/* 🔥 EVENT BOX FIX */
 .event-box {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: black;
+
+  /* THIS FIXES CUT-OFF TEXT */
   white-space: normal;
+  word-wrap: break-word;
+  overflow: visible;
+
+  padding: 2px 4px;
 }

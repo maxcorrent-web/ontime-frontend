@@ -141,6 +141,10 @@ function CalendarApp() {
 
       <div className="calendar-container">
         <FullCalendar
+      
+        eventBackgroundColor="#fb923c"
+eventBorderColor="#f97316"
+eventTextColor="#000"
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={{
@@ -153,11 +157,13 @@ function CalendarApp() {
           nowIndicator={true}
           slotMinTime="00:00:00"
           slotMaxTime="24:00:00"
-          eventMinHeight={30}
+          eventMinHeight={40}
           dayMaxEvents={true}
           eventContent={(arg) => (
-            <div className="event-box">{arg.event.title}</div>
-          )}
+  <div className="event-box">
+    <div>{arg.event.title}</div>
+  </div>
+)}
         />
       </div>
     </div>
