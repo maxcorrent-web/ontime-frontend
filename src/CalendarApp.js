@@ -24,10 +24,6 @@ function CalendarApp() {
   }, []);
 
   const fetchEvents = async () => {
-    await fetch(`${BACKEND_URL}/api/clear`, {
-  method: "POST",
-});
-    console.log("BUTTON CLICKED");
     try {
       // Save URLs
       localStorage.setItem(
@@ -42,28 +38,28 @@ function CalendarApp() {
       // Clear backend calendars
       await fetch(`${BACKEND_URL}/api/clear`, { method: "POST" });
 
-      // Add calendars
+      // Helper to add ICS calendar
+      const tryAdd = async (url, name) => {
+        if (!url) return;
+        try {
+          await fetch(`${BACKEND_URL}/api/add-ics`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ url }),
+          });
+          console.log(`${name} loaded`);
+        } catch (err) {
+          console.error(`${name} failed`, err);
+        }
+      };
 
-    const tryAdd = async (url, name) => {
-  if (!url) return;
-
-  try {
-    await fetch(`${BACKEND_URL}/api/add-ics`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url }),
-    });
-    console.log(`${name} loaded`);
-  } catch (err) {
-    console.error(`${name} failed`);
-  }
-};
-
-await tryAdd(schoologyUrl, "Schoology");
-await tryAdd(bandUrl, "Band");
-await tryAdd(googleUrl, "Google");
+await Promise.all([
+  tryAdd(schoologyUrl, "Schoology"),
+  tryAdd(bandUrl, "Band"),
+  tryAdd(googleUrl, "Google"),
+]);
 
       // Get merged events
       const res = await fetch(`${BACKEND_URL}/api/events`);
@@ -71,20 +67,18 @@ await tryAdd(googleUrl, "Google");
 
       // Color-code events
       const colored = data.map((event) => {
-  let color = "#6366f1";
-
-  if (event.source === "schoology") color = "#2563eb"; // blue
-  if (event.source === "band") color = "#16a34a"; // green
-  if (event.source === "google") color = "#dc2626"; // red
-
-  return {
-    title: event.title,
-    start: event.start,
-    end: event.end,
-    backgroundColor: color,
-    borderColor: color,
-  };
-});
+        let color = "#6366f1";
+        if (event.source === "schoology") color = "#2563eb"; // blue
+        if (event.source === "band") color = "#16a34a"; // green
+        if (event.source === "google") color = "#dc2626"; // red
+        return {
+          title: event.title,
+          start: event.start,
+          end: event.end,
+          backgroundColor: color,
+          borderColor: color,
+        };
+      });
 
       setEvents(colored);
     } catch (err) {
@@ -95,8 +89,8 @@ await tryAdd(googleUrl, "Google");
   return (
     <div className="container">
       <div className="header">
-  <h1 className="title">📅 On Time</h1>
-</div>
+        <h1 className="title">📅 On Time</h1>
+      </div>
 
       <div className="input-boxes">
         <input
@@ -104,25 +98,27 @@ await tryAdd(googleUrl, "Google");
           value={schoologyUrl}
           onChange={(e) => setSchoologyUrl(e.target.value)}
         />
-
         <input
           placeholder="Paste Band Calendar ICS URL"
           value={bandUrl}
           onChange={(e) => setBandUrl(e.target.value)}
         />
-
         <input
           placeholder="Paste Google Calendar ICS URL"
           value={googleUrl}
           onChange={(e) => setGoogleUrl(e.target.value)}
         />
-
         <button onClick={fetchEvents}>Load Calendars</button>
       </div>
 
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        }}
         editable={true}
         selectable={true}
         events={events}
@@ -131,15 +127,5 @@ await tryAdd(googleUrl, "Google");
     </div>
   );
 }
-<FullCalendar
-  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-  initialView="dayGridMonth"
-  headerToolbar={{
-    left: "prev,next today",
-    center: "title",
-    right: "dayGridMonth,timeGridWeek,timeGridDay",
-  }}
-  events={events}
-  height="80vh"
-/>
+
 export default CalendarApp;
