@@ -13,7 +13,7 @@ function CalendarApp() {
   const [googleUrl, setGoogleUrl] = useState("");
   const [events, setEvents] = useState([]);
 
-  // ✅ fetchEvents wrapped in useCallback so useEffect can safely use it
+  // ✅ Fetch events wrapped in useCallback for safe useEffect
   const fetchEvents = useCallback(async () => {
     setEvents([]); // clear old events
     try {
@@ -59,21 +59,33 @@ function CalendarApp() {
       const colored = data.map((event) => {
         let color;
         switch (event.source) {
-  case "schoology": color = "#2563eb"; break; // blue
-  case "band": color = "#16a34a"; break; // green
-  case "google": color = "#dc2626"; break; // red
-  default: color = "#6366f1"; break;
-}
+          case "schoology": color = "#2563eb"; break; // blue
+          case "band": color = "#16a34a"; break; // green
+          case "google": color = "#dc2626"; break; // red
+          default: color = "#6366f1"; break;
+        }
         return {
           title: event.title,
           start: event.start,
           end: event.end,
           backgroundColor: color,
           borderColor: color,
+          extendedProps: { source: event.source },
         };
       });
 
-      setEvents(colored);
+      // ✅ Remove duplicates
+      const uniqueEvents = [];
+      const seen = new Set();
+      for (const ev of colored) {
+        const key = ev.title + ev.start + ev.extendedProps.source;
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueEvents.push(ev);
+        }
+      }
+
+      setEvents(uniqueEvents); // set deduplicated events
     } catch (err) {
       console.error("Error loading calendars:", err);
     }
@@ -88,6 +100,8 @@ function CalendarApp() {
       setGoogleUrl(saved.google || "");
     }
 
+    fetchEvents(); // initial fetch
+
     const interval = setInterval(() => {
       fetchEvents();
     }, 5 * 60 * 1000); // refresh every 5 minutes
@@ -97,42 +111,64 @@ function CalendarApp() {
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
-  <div className="header text-center mb-6">
-    <h1 className="text-4xl font-bold text-indigo-600">📅 On Time</h1>
-    <p className="text-gray-500 mt-2">
-      Merge your Schoology, Band, and Google calendars
-    </p>
-  </div>
+      {/* Header */}
+      <div className="header text-center mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
+        <h1 className="text-5xl font-bold">📅 On Time</h1>
+        <p className="mt-2 text-lg">Merge your Schoology, Band, and Google calendars</p>
+      </div>
 
-  <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
-    <input placeholder="Schoology ICS" value={schoologyUrl} onChange={e=>setSchoologyUrl(e.target.value)}
-      className="border p-2 rounded-md w-full md:w-1/3" />
-    <input placeholder="Band ICS" value={bandUrl} onChange={e=>setBandUrl(e.target.value)}
-      className="border p-2 rounded-md w-full md:w-1/3" />
-    <input placeholder="Google ICS" value={googleUrl} onChange={e=>setGoogleUrl(e.target.value)}
-      className="border p-2 rounded-md w-full md:w-1/3" />
-    <button onClick={fetchEvents} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition shadow">
-      Load Calendars
-    </button>
-  </div>
+      {/* Inputs */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
+        <input
+          placeholder="Schoology ICS"
+          value={schoologyUrl}
+          onChange={(e) => setSchoologyUrl(e.target.value)}
+          className="border-2 border-indigo-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-indigo-300"
+        />
+        <input
+          placeholder="Band ICS"
+          value={bandUrl}
+          onChange={(e) => setBandUrl(e.target.value)}
+          className="border-2 border-green-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-green-300"
+        />
+        <input
+          placeholder="Google ICS"
+          value={googleUrl}
+          onChange={(e) => setGoogleUrl(e.target.value)}
+          className="border-2 border-red-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-red-300"
+        />
+        <button
+          onClick={fetchEvents}
+          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition shadow-lg"
+        >
+          Load Calendars
+        </button>
+      </div>
 
-  <FullCalendar
-    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-    initialView="dayGridMonth"
-    headerToolbar={{ left:"prev,next today", center:"title", right:"dayGridMonth,timeGridWeek,timeGridDay" }}
-    editable={true}
-    selectable={true}
-    events={events}
-    height="auto"
-    nowIndicator={true}
-    weekNumbers={true}
-    slotMinTime="00:00:00"
-    slotMaxTime="24:00:00"
-    eventDisplay="block"
-    eventTextColor="#fff"
-    dayMaxEvents={true}
-  />
-</div>
+      {/* Calendar */}
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" }}
+        editable={true}
+        selectable={true}
+        events={events}
+        height="auto"
+        nowIndicator={true}
+        weekNumbers={true}
+        slotMinTime="00:00:00"
+        slotMaxTime="24:00:00"
+        eventDisplay="block"
+        eventTextColor="#fff"
+        dayMaxEvents={true}
+        eventMinHeight={25}
+        eventContent={(arg) => (
+          <div className="p-1 text-xs md:text-sm overflow-visible whitespace-normal rounded-md">
+            {arg.event.title}
+          </div>
+        )}
+      />
+    </div>
   );
 }
 
