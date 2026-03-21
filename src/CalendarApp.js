@@ -64,6 +64,12 @@ function CalendarApp() {
       // Fetch events
       const res = await fetch(`${BACKEND_URL}/api/events`);
       const data = await res.json();
+      console.log("EVENTS FROM BACKEND:", data);
+      console.log("Sending URLs:", {
+  schoologyUrl,
+  bandUrl,
+  googleUrl,
+});
 
       // Color + dedupe
       const seen = new Set();
@@ -116,17 +122,17 @@ function CalendarApp() {
 
       <div className="inputs">
         <input
-          placeholder="Schoology ICS URL"
+          placeholder="Schoology Link"
           value={schoologyUrl}
           onChange={(e) => setSchoologyUrl(e.target.value)}
         />
         <input
-          placeholder="Band / Remind ICS URL"
+          placeholder="Band Link"
           value={bandUrl}
           onChange={(e) => setBandUrl(e.target.value)}
         />
         <input
-          placeholder="Google Calendar ICS URL"
+          placeholder="Google Calendar Link"
           value={googleUrl}
           onChange={(e) => setGoogleUrl(e.target.value)}
         />
