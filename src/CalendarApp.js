@@ -40,16 +40,6 @@ function CalendarApp() {
       await fetch(`${BACKEND_URL}/api/clear`, { method: "POST" });
 
       // Add calendars
-      const addCalendar = async (url) => {
-        if (!url) return;
-        await fetch(`${BACKEND_URL}/api/add-ics`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ url }),
-        });
-      };
 
     const tryAdd = async (url, name) => {
   if (!url) return;
