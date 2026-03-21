@@ -1,13 +1,9 @@
-body {
-  background: #e5e7eb; /* light gray */
-  color: #111827; /* black text */
+body, .app {
+  /* Vertical gradient from dark gray to lighter dark gray */
+  background: linear-gradient(to bottom, #1f2937, #374151);
+  color: #111827; /* keep text black */
   font-family: Arial, sans-serif;
-}
-
-.app {
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
+  min-height: 100vh;
 }
 
 /* Header */
@@ -56,10 +52,10 @@ body {
 
 /* Calendar container */
 .calendar-container {
-  background: white;
+  background: #f9fafb; /* almost white */
   padding: 15px;
   border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3); /* stronger shadow for contrast */
 }
 
 /* 🔥 EVENT BOX FIX */
