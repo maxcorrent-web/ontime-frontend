@@ -75,3 +75,23 @@ body {
 
   padding: 2px 4px;
 }
+/* 🔥 FORCE ORANGE EVENTS (OVERRIDES FULLCALENDAR DEFAULT BLUE) */
+.fc .fc-event {
+  background: linear-gradient(to right, #f97316, #fb923c) !important;
+  border: none !important;
+  color: black !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+}
+
+/* Make event text readable */
+.fc .fc-event-title {
+  color: black !important;
+  font-weight: 500;
+}
+
+/* Remove blue highlight when clicking */
+.fc .fc-event:focus {
+  outline: none;
+  box-shadow: none;
+}

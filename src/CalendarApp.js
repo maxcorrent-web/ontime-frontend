@@ -71,40 +71,22 @@ function CalendarApp() {
   googleUrl,
 });
 
-      // Color + dedupe
-      const seen = new Set();
-      const formatted = data
-        .map((event) => {
-          let color;
-          switch (event.source) {
-            case "schoology":
-              color = "#2563eb";
-              break;
-            case "band":
-              color = "#16a34a";
-              break;
-            case "google":
-              color = "#dc2626";
-              break;
-            default:
-              color = "#6366f1";
-          }
+      // Deduplicate events
+const seen = new Set();
+const formatted = data
+  .map((event) => ({
+    title: event.title,
+    start: event.start,
+    end: event.end,
+  }))
+  .filter((ev) => {
+    const key = ev.title + ev.start;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
-          return {
-            title: event.title,
-            start: event.start,
-            end: event.end,
-            backgroundColor: color,
-            borderColor: color,
-            extendedProps: { source: event.source },
-          };
-        })
-        .filter((ev) => {
-          const key = ev.title + ev.start + ev.extendedProps.source;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
+setEvents(formatted);
 
       setEvents(formatted);
     } catch (err) {
