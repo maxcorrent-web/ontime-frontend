@@ -93,21 +93,27 @@ function CalendarApp() {
 
   // Load saved URLs & auto-refresh
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("calendars"));
-    if (saved) {
-      setSchoologyUrl(saved.schoology || "");
-      setBandUrl(saved.band || "");
-      setGoogleUrl(saved.google || "");
-    }
+  const saved = JSON.parse(localStorage.getItem("calendars"));
+  if (saved) {
+    setSchoologyUrl(saved.schoology || "");
+    setBandUrl(saved.band || "");
+    setGoogleUrl(saved.google || "");
+  }
 
-    fetchEvents(); // initial fetch
+  // ✅ Only fetch if at least one URL exists
+  if ((saved?.schoology || saved?.band || saved?.google)) {
+    fetchEvents();
+  }
 
-    const interval = setInterval(() => {
+  const interval = setInterval(() => {
+    // ✅ Only fetch if user has input URLs
+    if (schoologyUrl || bandUrl || googleUrl) {
       fetchEvents();
-    }, 5 * 60 * 1000); // refresh every 5 minutes
+    }
+  }, 5 * 60 * 1000);
 
-    return () => clearInterval(interval);
-  }, [fetchEvents]);
+  return () => clearInterval(interval);
+}, [fetchEvents, schoologyUrl, bandUrl, googleUrl]);
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
