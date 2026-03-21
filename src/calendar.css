@@ -1,97 +1,57 @@
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #f1f5f9;
+  background: #0f172a;
+  color: white;
+  font-family: Arial, sans-serif;
 }
 
-.container {
+.app {
   max-width: 1100px;
   margin: auto;
   padding: 20px;
 }
 
 .header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  justify-content: center;
+  text-align: center;
   margin-bottom: 20px;
 }
 
-.logo {
-  width: 50px;
-  height: 50px;
+.header h1 {
+  font-size: 3rem;
+  background: linear-gradient(to right, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-h1 {
-  font-size: 40px;
-  margin: 0;
-}
-
-.input-boxes {
+.inputs {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-input {
-  padding: 12px;
+.inputs input {
+  padding: 10px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: none;
 }
 
-button {
+.inputs button {
   padding: 12px;
-  background: #4f46e5;
-  color: white;
+  background: linear-gradient(to right, #6366f1, #ec4899);
   border: none;
-  border-radius: 8px;
+  color: white;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
 }
 
-button:hover {
-  background: #4338ca;
-}
-@media (max-width: 600px) {
-  .container {
-    padding: 10px;
-  }
-
-  h1 {
-    font-size: 28px;
-  }
-
-  input {
-    font-size: 14px;
-  }
-}
-.header {
-  text-align: center;
-  margin-bottom: 20px;
+.calendar-container {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 15px;
 }
 
-.title {
-  font-size: 2.5rem;
-  text-align: center;
-  margin-bottom: 20px;
-}
-/* calendar.css */
-.fc {
-  background-color: #f9fafb; /* light gray background */
-  border-radius: 1rem;
-  padding: 0.5rem;
-}
-.fc .fc-event {
-  border-radius: 0.5rem;
-}
-/* Hover effect for events */
-.fc-event {
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.fc-event:hover {
-  transform: scale(1.03);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  z-index: 100;
+.event-box {
+  font-size: 0.8rem;
+  white-space: normal;
 }
