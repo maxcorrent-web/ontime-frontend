@@ -44,9 +44,7 @@ function CalendarApp() {
         try {
           await fetch(`${BACKEND_URL}/api/add-ics`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url }),
           });
           console.log(`${name} loaded`);
@@ -55,11 +53,12 @@ function CalendarApp() {
         }
       };
 
-await Promise.all([
-  tryAdd(schoologyUrl, "Schoology"),
-  tryAdd(bandUrl, "Band"),
-  tryAdd(googleUrl, "Google"),
-]);
+      // Load all calendars in parallel
+      await Promise.all([
+        tryAdd(schoologyUrl, "Schoology"),
+        tryAdd(bandUrl, "Band"),
+        tryAdd(googleUrl, "Google"),
+      ]);
 
       // Get merged events
       const res = await fetch(`${BACKEND_URL}/api/events`);
@@ -67,10 +66,18 @@ await Promise.all([
 
       // Color-code events
       const colored = data.map((event) => {
-        let color = "#6366f1";
-        if (event.source === "schoology") color = "#2563eb"; // blue
-        if (event.source === "band") color = "#16a34a"; // green
-        if (event.source === "google") color = "#dc2626"; // red
+        let color = "#6366f1"; // default purple
+        switch (event.source) {
+          case "schoology":
+            color = "#2563eb"; // blue
+            break;
+          case "band":
+            color = "#16a34a"; // green
+            break;
+          case "google":
+            color = "#dc2626"; // red
+            break;
+        }
         return {
           title: event.title,
           start: event.start,
@@ -87,30 +94,44 @@ await Promise.all([
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <h1 className="title">📅 On Time</h1>
+    <div className="container mx-auto p-4">
+      {/* Header */}
+      <div className="header text-center mb-6">
+        <h1 className="text-4xl font-bold text-indigo-600">📅 On Time</h1>
+        <p className="text-gray-500 mt-2">
+          Merge your Schoology, Band, and Google calendars
+        </p>
       </div>
 
-      <div className="input-boxes">
+      {/* Input boxes */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
         <input
           placeholder="Paste Schoology ICS URL"
           value={schoologyUrl}
           onChange={(e) => setSchoologyUrl(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/3"
         />
         <input
           placeholder="Paste Band Calendar ICS URL"
           value={bandUrl}
           onChange={(e) => setBandUrl(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/3"
         />
         <input
           placeholder="Paste Google Calendar ICS URL"
           value={googleUrl}
           onChange={(e) => setGoogleUrl(e.target.value)}
+          className="border p-2 rounded-md w-full md:w-1/3"
         />
-        <button onClick={fetchEvents}>Load Calendars</button>
+        <button
+          onClick={fetchEvents}
+          className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition"
+        >
+          Load Calendars
+        </button>
       </div>
 
+      {/* Calendar */}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -122,7 +143,11 @@ await Promise.all([
         editable={true}
         selectable={true}
         events={events}
-        height="80vh"
+        height="auto"
+        nowIndicator={true}
+        weekNumbers={true}
+        slotMinTime="06:00:00"
+        slotMaxTime="22:00:00"
       />
     </div>
   );
