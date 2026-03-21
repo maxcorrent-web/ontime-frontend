@@ -86,3 +86,12 @@ button:hover {
 .fc .fc-event {
   border-radius: 0.5rem;
 }
+/* Hover effect for events */
+.fc-event {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.fc-event:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 100;
+}

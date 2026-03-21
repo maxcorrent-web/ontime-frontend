@@ -13,9 +13,11 @@ function CalendarApp() {
   const [googleUrl, setGoogleUrl] = useState("");
   const [events, setEvents] = useState([]);
 
-  // ✅ Fetch events wrapped in useCallback for safe useEffect
+  // ✅ Fetch events
   const fetchEvents = useCallback(async () => {
+    if (!schoologyUrl && !bandUrl && !googleUrl) return; // nothing to fetch
     setEvents([]); // clear old events
+
     try {
       // Save URLs locally
       localStorage.setItem(
@@ -44,7 +46,7 @@ function CalendarApp() {
         }
       };
 
-      // Load all calendars in parallel
+      // Load calendars in parallel
       await Promise.all([
         tryAdd(schoologyUrl, "Schoology"),
         tryAdd(bandUrl, "Band"),
@@ -74,7 +76,7 @@ function CalendarApp() {
         };
       });
 
-      // ✅ Remove duplicates
+      // Remove duplicates
       const uniqueEvents = [];
       const seen = new Set();
       for (const ev of colored) {
@@ -85,40 +87,41 @@ function CalendarApp() {
         }
       }
 
-      setEvents(uniqueEvents); // set deduplicated events
+      setEvents(uniqueEvents);
     } catch (err) {
       console.error("Error loading calendars:", err);
     }
   }, [schoologyUrl, bandUrl, googleUrl]);
 
-  // Load saved URLs & auto-refresh
+  // Load saved URLs on mount
   useEffect(() => {
-  const saved = JSON.parse(localStorage.getItem("calendars"));
-  if (saved) {
-    setSchoologyUrl(saved.schoology || "");
-    setBandUrl(saved.band || "");
-    setGoogleUrl(saved.google || "");
-  }
+    const saved = JSON.parse(localStorage.getItem("calendars"));
+    if (saved) {
+      setSchoologyUrl(saved.schoology || "");
+      setBandUrl(saved.band || "");
+      setGoogleUrl(saved.google || "");
 
-  // ✅ Only fetch if at least one URL exists
-  if ((saved?.schoology || saved?.band || saved?.google)) {
-    fetchEvents();
-  }
-
-  const interval = setInterval(() => {
-    // ✅ Only fetch if user has input URLs
-    if (schoologyUrl || bandUrl || googleUrl) {
-      fetchEvents();
+      // Only fetch if saved URLs exist
+      if (saved.schoology || saved.band || saved.google) {
+        fetchEvents();
+      }
     }
-  }, 5 * 60 * 1000);
+  }, [fetchEvents]);
 
-  return () => clearInterval(interval);
-}, [fetchEvents, schoologyUrl, bandUrl, googleUrl]);
+  // Auto-refresh every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (schoologyUrl || bandUrl || googleUrl) {
+        fetchEvents();
+      }
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [schoologyUrl, bandUrl, googleUrl, fetchEvents]);
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       {/* Header */}
-      <div className="header text-center mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
+      <div className="text-center mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-6 shadow-lg text-white">
         <h1 className="text-5xl font-bold">📅 On Time</h1>
         <p className="mt-2 text-lg">Merge your Schoology, Band, and Google calendars</p>
       </div>
@@ -126,19 +129,19 @@ function CalendarApp() {
       {/* Inputs */}
       <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
         <input
-          placeholder="Schoology ICS"
+          placeholder="Schoology ICS URL"
           value={schoologyUrl}
           onChange={(e) => setSchoologyUrl(e.target.value)}
           className="border-2 border-indigo-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-indigo-300"
         />
         <input
-          placeholder="Band ICS"
+          placeholder="Band ICS URL"
           value={bandUrl}
           onChange={(e) => setBandUrl(e.target.value)}
           className="border-2 border-green-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-green-300"
         />
         <input
-          placeholder="Google ICS"
+          placeholder="Google ICS URL"
           value={googleUrl}
           onChange={(e) => setGoogleUrl(e.target.value)}
           className="border-2 border-red-400 p-3 rounded-lg w-full md:w-1/3 shadow-md focus:ring-2 focus:ring-red-300"
@@ -152,28 +155,34 @@ function CalendarApp() {
       </div>
 
       {/* Calendar */}
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" }}
-        editable={true}
-        selectable={true}
-        events={events}
-        height="auto"
-        nowIndicator={true}
-        weekNumbers={true}
-        slotMinTime="00:00:00"
-        slotMaxTime="24:00:00"
-        eventDisplay="block"
-        eventTextColor="#fff"
-        dayMaxEvents={true}
-        eventMinHeight={25}
-        eventContent={(arg) => (
-          <div className="p-1 text-xs md:text-sm overflow-visible whitespace-normal rounded-md">
-            {arg.event.title}
-          </div>
-        )}
-      />
+      <div className="bg-gray-50 p-4 rounded-xl shadow-inner">
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
+          }}
+          editable={true}
+          selectable={true}
+          events={events}
+          height="auto"
+          nowIndicator={true}
+          weekNumbers={true}
+          slotMinTime="00:00:00"
+          slotMaxTime="24:00:00"
+          eventDisplay="block"
+          eventTextColor="#fff"
+          dayMaxEvents={true}
+          eventMinHeight={25}
+          eventContent={(arg) => (
+            <div className="p-1 text-xs md:text-sm overflow-visible whitespace-normal rounded-md">
+              {arg.event.title}
+            </div>
+          )}
+        />
+      </div>
     </div>
   );
 }
