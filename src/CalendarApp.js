@@ -24,6 +24,7 @@ function CalendarApp() {
   }, []);
 
   const fetchEvents = async () => {
+    console.log("BUTTON CLICKED");
     try {
       // Save URLs
       localStorage.setItem(
@@ -50,9 +51,26 @@ function CalendarApp() {
         });
       };
 
-      await addCalendar(schoologyUrl);
-      await addCalendar(bandUrl);
-      await addCalendar(googleUrl);
+    const tryAdd = async (url, name) => {
+  if (!url) return;
+
+  try {
+    await fetch(`${BACKEND_URL}/api/add-ics`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
+    console.log(`${name} loaded`);
+  } catch (err) {
+    console.error(`${name} failed`);
+  }
+};
+
+await tryAdd(schoologyUrl, "Schoology");
+await tryAdd(bandUrl, "Band");
+await tryAdd(googleUrl, "Google");
 
       // Get merged events
       const res = await fetch(`${BACKEND_URL}/api/events`);
